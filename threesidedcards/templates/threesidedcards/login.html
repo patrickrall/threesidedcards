@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        {% load staticfiles %}
+        <link rel="stylesheet" type="text/css" href="{% static 'threesidedcards/style.css' %}" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>汉字、英文、拼音三面卡！</title>
+    </head>
+    <body>
+        <div class="maincolumn">
+            <div><h1>汉字、英文、拼音三面卡！</h1></div>
+            {% if create %}
+            <form action="{% url 'threesidedcards.views.login' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" value="{{create}}" name="createuser" />
+            <script type="text/javascript">
+                window.submitfunc = function() {
+                    yesbutton.style.display="none"
+                    nobutton.style.display="none"
+                    question.style.display="none"
+                    dialog.style.display=""
+                }
+            </script>
+            <div id="question">Create user {{ create }}?</div>
+            <input type="submit" value="Yes" name="create" id="yesbutton" onclick="submitfunc()"/>
+            <input type="submit" value="No" name="create" id="nobutton"/>
+            <div id="dialog" style="display:none;">Creating flashcards, please wait...</div>
+            </form>
+            {% else %}
+            <form action="{% url 'threesidedcards.views.login' %}" method="post">
+            {% csrf_token %}
+            {% if error %}
+            <div>{{ error }}</div>
+            {% endif %}
+            <div>New users: log in to create a user</div>
+            <input type="text" placeholder="Type your username..." value="" name="user" />
+            {%if notlocal %}
+            <div>Please type the off-campus password:</div>
+            <input type="password" value="" name="password" />
+            {% endif %}
+
+            <input type="submit" value="Log in" />
+            </form>
+            {% endif %}
+        </div>
+    </body>
+</html>

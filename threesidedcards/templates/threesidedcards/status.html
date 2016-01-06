@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        {% load staticfiles %}
+
+        <link rel="stylesheet" type="text/css" href="{% static 'threesidedcards/style.css' %}" />
+         
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>汉字、英文、拼音三面卡！</title>
+        <script type="text/javascript" src="{% static 'threesidedcards/angular.js' %}"></script> 
+        <script type="text/javascript" src="{% static 'threesidedcards/status.js' %}"></script>
+    </head>
+    {% verbatim %}
+    <body ng-app="FlashcardStatus">
+        <div class="maincolumn" ng-controller="status">
+            <div><h1>汉字、英文、拼音三面卡！</h1></div>
+            <div style="text-align:center;">Logged in as{% endverbatim %} {{ request.user }}{% verbatim %}.  <span style="white-space:nowrap;"><a href="/flashcards">Main</a> <a href="/flashcards/logout/">Log out</a></span></div>
+            <div ng-show="error != ''">{{ error }}</div>
+            <div><h2>User Status</h2></div>
+            <div ng-repeat-start="user in users">{{ user.name }} <span ng-show="user.score !== undefined"> - Score: {{ user.score }}</span></div>
+            <div ng-repeat-end histogram="user.histogram"></div>
+        </div>
+    </body>
+    {% endverbatim %}
+</html>
