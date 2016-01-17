@@ -15,7 +15,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 import random
 
@@ -68,16 +68,19 @@ def login(request):
             except IntegrityError:
                 return render(request,"threesidedcards/login.html",{"error":"Could not create user."})
 
-            for triple in Triple.objects.all():
-                for direct in ['CP','PC','CE','EC','EP','PE']:
-                    score = Score()
-                    score.triple = triple
-                    score.user = user
-                    score.nexttime = datetime.datetime.now()
-                    score.direction = direct
-                    score.score = 0
-                    score.save()
+            @transaction.atomic
+            def makeTriples(user):
+                for triple in Triple.objects.all():
+                    for direct in ['CP','PC','CE','EC','EP','PE']:
+                        score = Score()
+                        score.triple = triple
+                        score.user = user
+                        score.nexttime = datetime.datetime.now()
+                        score.direction = direct
+                        score.score = 0
+                        score.save()
 
+            makeTriples(user)
 
             user = authenticate(username=user.username,password=defaultpass)
             if user is not None:
@@ -131,6 +134,10 @@ def getItems(request):
         newitems = items.filter(triple__quiz=True)
         if (len(newitems) != 0):
             items = newitems
+            if "filter" in request.GET:
+                message = "优先: Chapter " + request.GET["filter"] + " quiz, "+str(len(newitems))+"个卡。"
+            else:
+                message = "优先: All quizzes, "+str(len(newitems))+"个卡。"
         else:
             message = "No cards available for quiz"
             if "filter" in request.GET:
@@ -229,7 +236,7 @@ def statusData(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse("threesidedcards.views.login"))
 
-    if (request.user.is_staff or request.user.is_superuser):
+    if (request.user.is_staff or request.user.is_superuser or request.user.username == "wxyun"):
         datalist = []
         for user in User.objects.all():
             dataobject = {'name': user.username}

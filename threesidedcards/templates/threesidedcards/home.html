@@ -19,27 +19,27 @@
             <div style="text-align:center;">Logged in as {% endverbatim %}{{ request.user }}{% verbatim %}. <span style="white-space:nowrap;"><a href="/flashcards/status/">Status</a> <a href="/flashcards/logout/">Log out</a></span></div>
             <div ng-show="error != ''">{{ error }}</div>
             <div ng-class="toLang" ng-show="length > 0">{{ reqText }}</div>
-            <div class="flipcard" ng-class="[fromLang,flipped]" ng-show="length > 0">
-                <div class="quizmarker" ng-show="onquiz">On Quiz</div><div class="alternatives" ng-hide="current.length == 1">{{ current.length }} meanings</div>
+            <div class="flipcard" ng-class="[fromLang,flipped]" ng-show="length > 0" ng-click="cardflip()">
+                <div class="quizmarker" ng-show="onquiz">On Quiz</div><div class="alternatives" ng-hide="current.length == 1">{{ current.length }} meanings</div><div class="chaptermarker" >Chapter {{ chapter[0] }}</div>
                 {{fromText|unsafe}}</div>
-            <table class="flipcard secondcard" ng-class="[flipped]" ng-show="length > 0">
-                <tr class="toRow" ng-class="[toLang]"><td ng-repeat="toText in toTexts track by $index" ng-bind-html="toText|unsafe"></td></tr>
+            <table class="flipcard secondcard" ng-class="[flipped]" ng-show="length > 0" ng-click="cardflip()">
+                <tr class="toRow" ng-class="[toLang]"><td ng-repeat="toText in toTexts track by $index"><div class="chaptermarker" >Chapter {{ chapter[$index] }}</div>{{ toText| unsafe }}</td></tr>
                 <tr class="otherRow" ng-class="[otherLang]"><td ng-repeat="otherText in otherTexts track by $index" ng-bind-html="otherText|unsafe"></td></tr>
             </table>
-            <div style="cursor:pointer;" ng-show="flipped == 'noflip' && length > 0" ng-click="ready()">好了</div>
-            <div class="verify" ng-show="flipped == 'flip' && length > 0">
+            <div style="cursor:pointer;" ng-show="!isready && length > 0" ng-click="ready()">好了</div>
+            <div class="verify" ng-show="isready && length > 0">
                 <div style="background-color:#8F8; cursor:pointer;" ng-click="correct()">对!</div><!--
                 --><div style="background-color:#F55; cursor:pointer;" ng-click="notcorrect()">错...</div>
             </div>
             <div ng-show="length > 0 && toLang == 'characters'" drawingpad></div>
-            <div ng-show="length > 0 && chapters.length != 0">Filter to chapter: <select ng-model="selected" ng-options="chapter for chapter in chapters" ng-change="fetch()"></select></div>
+             <div ng-show="length > 0 && message != ''">{{ message }}</div>
+            <div ng-show="length > 0">提供{{ length }}个卡。</div>
+           <div ng-show="length > 0 && chapters.length != 0">Filter to chapter: <select ng-model="selected" ng-options="chapter for chapter in chapters" ng-change="fetch()"></select></div>
             <div ng-show="length > 0 && chapters.length != 0">Quiz only: 
                 <div class="squaredFour">
-                  <input type="checkbox" value="None" id="squaredFour" ng-model="quizonly"  name="check" />
+                  <input type="checkbox" value="None" id="squaredFour" ng-model="quizonly"  name="check" ng-change="fetch()" />
                   <label for="squaredFour"></label>
                 </div></div>
-            <div ng-show="length > 0 && message != ''">{{ message }}</div>
-            <div ng-show="length > 0">提供{{ length }}个卡。</div>
             <div ng-show="length == 0 && timeuntil != ''">没有可用的卡。</div>
             <div ng-show="length == 0 && timeuntil != ''">{{ timeuntil }}</div>
             <div ng-show="length == 0 && timeuntil == ''">取...</div>

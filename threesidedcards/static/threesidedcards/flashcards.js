@@ -22,6 +22,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
     $scope.otherTexts = [""]
 
     $scope.flipped = "noflip"
+    $scope.isready = false
 
     $scope.length = 0
     $scope.previous = []
@@ -33,10 +34,13 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
     $scope.selected = 'None'
     $scope.quizonly = false
     $scope.onquiz = false
+    $scope.chapter = ''
 
     $scope.error = ''
 
     $scope.fetch = function() {
+        $scope.flipped= "noflip"
+        $scope.isready = false
         var append = ""
         if ($scope.selected != "None") {
             append = "&filter="+$scope.selected
@@ -131,6 +135,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
 
             $scope.fromText = JSON.parse(response.data[0])[0].fields[lookup[dir[0]]]
             $scope.onquiz = JSON.parse(response.data[0])[0].fields.quiz
+            $scope.chapter = [] 
 
             $scope.toTexts = []
             $scope.otherTexts = []
@@ -138,6 +143,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
                 var row = JSON.parse(response.data[i])
                 $scope.toTexts.push(row[0].fields[lookup[dir[1]]])
                 $scope.otherTexts.push(row[0].fields[lookup[other]])
+                $scope.chapter.push(row[0].fields.chapter)
             }
 
         },function(response) {
@@ -149,6 +155,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
 
     $scope.ready= function() {
         $scope.flipped = "flip"
+        $scope.isready = true
     }
 
     $scope.correct= function() {
@@ -156,6 +163,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
         $scope.fromText = "..."
         $scope.otherTexts = ["..."]
         $scope.flipped = "noflip"
+        $scope.isready = false
 
         $http.get('/flashcards/submit/?correct&pk='+$scope.current[0].pk, {}).then(function(response) {
             $timeout($scope.fetch,100)
@@ -169,6 +177,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
         $scope.fromText = "..."
         $scope.otherTexts = ["..."]
         $scope.flipped = "noflip"
+        $scope.isready = false
 
         $http.get('/flashcards/submit/?pk='+$scope.current[0].pk, {}).then(function(response) {
             
@@ -177,6 +186,12 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
             $scope.error = response.statusText
         });
 
+    }
+
+   $scope.cardflip= function() {
+       if (!$scope.isready) return
+       if ($scope.flipped == "flip") $scope.flipped = "noflip"
+       else $scope.flipped = "flip"
     }
 
 }])
@@ -244,6 +259,7 @@ Flashcards.directive("drawingpad", function() {
                 $scope.context.strokeStyle = "black"
                 $scope.context.lineWidth = 8
                 $scope.context.lineCap = "round"
+                $scope.context.limeJoin = "round"
                 $scope.context.stroke()
 
                 return false
