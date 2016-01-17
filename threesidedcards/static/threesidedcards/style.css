@@ -110,6 +110,14 @@ div.flipcard div.chaptermarker {
     background:none;
 }
 
+div.flipcard div.boxstatus {
+    position:absolute;
+    font-size:15px;
+    bottom:10px;
+    left:10px;
+    background:none;
+}
+
 
 table.flipcard {
     width:100%;

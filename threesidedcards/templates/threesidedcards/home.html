@@ -20,7 +20,7 @@
             <div ng-show="error != ''">{{ error }}</div>
             <div ng-class="toLang" ng-show="length > 0">{{ reqText }}</div>
             <div class="flipcard" ng-class="[fromLang,flipped]" ng-show="length > 0" ng-click="cardflip()">
-                <div class="quizmarker" ng-show="onquiz">On Quiz</div><div class="alternatives" ng-hide="current.length == 1">{{ current.length }} meanings</div><div class="chaptermarker" >Chapter {{ chapter[0] }}</div>
+                <div class="quizmarker" ng-show="onquiz">On Quiz</div><div class="alternatives" ng-hide="current.length == 1">{{ current.length }} meanings</div><div class="chaptermarker" >Chapter {{ chapter[0] }}</div><div class="boxstatus" >{{ boxstatus }}</div>
                 {{fromText|unsafe}}</div>
             <table class="flipcard secondcard" ng-class="[flipped]" ng-show="length > 0" ng-click="cardflip()">
                 <tr class="toRow" ng-class="[toLang]"><td ng-repeat="toText in toTexts track by $index"><div class="chaptermarker" >Chapter {{ chapter[$index] }}</div>{{ toText| unsafe }}</td></tr>
@@ -33,9 +33,9 @@
             </div>
             <div ng-show="length > 0 && toLang == 'characters'" drawingpad></div>
              <div ng-show="length > 0 && message != ''">{{ message }}</div>
-            <div ng-show="length > 0">提供{{ length }}个卡。</div>
-           <div ng-show="length > 0 && chapters.length != 0">Filter to chapter: <select ng-model="selected" ng-options="chapter for chapter in chapters" ng-change="fetch()"></select></div>
-            <div ng-show="length > 0 && chapters.length != 0">Quiz only: 
+           <div ng-show="length > 0 && chapters.length != 0">Filter: <select ng-model="selected" ng-options="chapter for chapter in chapters" ng-change="fetch()"></select></div>
+            <div ng-show="length > 0 && false">提供{{ length }}个卡。</div>
+            <div ng-show="length > 0 && chapters.length != 0 && false">Quiz only: 
                 <div class="squaredFour">
                   <input type="checkbox" value="None" id="squaredFour" ng-model="quizonly"  name="check" ng-change="fetch()" />
                   <label for="squaredFour"></label>

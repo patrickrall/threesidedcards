@@ -120,34 +120,43 @@ def getItems(request):
 
     length = len(items)
 
+    chapter = -1
+    isquiz = False
+    if "filter" in request.GET and len(request.GET["filter"]) > 0 and request.GET["filter"].split()[0] != "All":
+        chapter = int(request.GET["filter"].split()[1])
+        isquiz = request.GET["filter"].split()[2] == 'Quiz'
+        newitems = items.filter(triple__chapter=chapter)
 
-    if "filter" in request.GET:
-        newitems = items.filter(triple__chapter=request.GET["filter"])
-        if (len(newitems) != 0):
-            items = newitems
-            message = "优先: Chapter " + request.GET["filter"] + ", "+str(len(newitems))+"个卡。"
+        if (len(newitems) == 0):
+            message = "没有第"+str(chapter)+"课的卡片。"
+            chapter = -1
         else:
-            message = "No cards available for chapter "+request.GET["filter"]+"."
-
-
-    if "quiz" in request.GET:
-        newitems = items.filter(triple__quiz=True)
-        if (len(newitems) != 0):
             items = newitems
-            if "filter" in request.GET:
-                message = "优先: Chapter " + request.GET["filter"] + " quiz, "+str(len(newitems))+"个卡。"
-            else:
-                message = "优先: All quizzes, "+str(len(newitems))+"个卡。"
-        else:
-            message = "No cards available for quiz"
-            if "filter" in request.GET:
-                message += " for chapter "+request.GET["filter"]
-            message += "."
+            if isquiz:
+                newitems = items.filter(triple__quiz=True)
+                if (len(newitems) == 0):
+                    message = "没有第"+str(chapter)+"课的考试卡片。"
+                    isquiz =False
+                else:
+                    items = newitems
+
 
     chapters = []
     triples = Triple.objects.order_by("-chapter")
+    userscores = Score.objects.filter(user=request.user,nexttime__lte=datetime.datetime.now())
+    chapters.append("All chapters " + str(len(userscores)) + "个卡")
+    selectedchapter = chapters[0]
     while (len(triples) != 0):
-        chapters.append(triples[0].chapter)
+        count = len(userscores.filter(triple__chapter=triples[0].chapter))
+        chapters.append("Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡")
+
+        if chapter == triples[0].chapter: selectedchapter = "Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡"
+
+        countquiz = len(userscores.filter(triple__chapter=triples[0].chapter,triple__quiz=True))
+        if (countquiz != 0):
+            chapters.append("Chapter "+str(triples[0].chapter) + " Quiz " + str(countquiz) + "个卡")
+            if chapter == triples[0].chapter and isquiz: selectedchapter = "Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡"
+
         triples = triples.exclude(chapter=triples[0].chapter)
 
 
@@ -179,7 +188,8 @@ def getItems(request):
             "length": length,
             "current": [serializers.serialize("json",[elem]) for elem in combo],
             "message": message,
-            "chapters": chapters
+            "chapters": chapters,
+            "chapter": selectedchapter
             }
 
 

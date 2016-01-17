@@ -31,23 +31,25 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
     $scope.timeuntil = ''
     $scope.message = ''
     $scope.chapters = []
-    $scope.selected = 'None'
+    $scope.selected = ''
     $scope.quizonly = false
     $scope.onquiz = false
     $scope.chapter = ''
+    $scope.boxstatus = ''
 
     $scope.error = ''
 
     $scope.fetch = function() {
         $scope.flipped= "noflip"
         $scope.isready = false
+        $scope.boxstatus = ''
         var append = ""
         if ($scope.selected != "None") {
             append = "&filter="+$scope.selected
         }
-        if ($scope.quizonly) {
-            append = append + "&quiz"
-        }
+        //if ($scope.quizonly) {
+        //    append = append + "&quiz"
+        //}
 
 
         $http.get('/flashcards/getItems/?prev='+JSON.stringify($scope.previous)+append, {}).then(function(response) {
@@ -62,8 +64,9 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
 
                 $scope.length = response.data.length
                 $scope.message = response.data.message
+                
                 $scope.chapters = response.data.chapters
-                $scope.chapters.unshift("None")
+                $scope.selected = response.data.chapter
                 $scope.init() 
             } else {
                 $scope.length = 0
@@ -123,7 +126,19 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
             'P': "Zhuǎnhuàn chéng pīnyīn:",
         }
 
+
         $scope.reqText = lookup2[dir[1]]
+
+        var lookup3 = []
+        lookup3[0] = "1 min"
+        lookup3[1] = "1 hr"
+        lookup3[2] = "1 day"
+        lookup3[3] = "1/2 wk"
+        lookup3[4] = "1 wk"
+        lookup3[5] = "2 wk"
+        lookup3[6] = "1 mon"
+        $scope.boxstatus = lookup3[first.fields.score]
+
 
         var triples = []
         for (var i = 0; i < $scope.current.length; i++) {
@@ -166,7 +181,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
         $scope.isready = false
 
         $http.get('/flashcards/submit/?correct&pk='+$scope.current[0].pk, {}).then(function(response) {
-            $timeout($scope.fetch,100)
+            $timeout($scope.fetch,500)
         },function(response) {
             $scope.error = response.statusText
         });
