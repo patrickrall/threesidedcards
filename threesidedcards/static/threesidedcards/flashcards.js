@@ -21,6 +21,8 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
     $scope.fromText = ""
     $scope.otherTexts = [""]
 
+    $scope.toMinified = "fullSize"
+
     $scope.flipped = "noflip"
     $scope.isready = false
 
@@ -119,6 +121,7 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
         $scope.fromLang = lookup[dir[0]]
         $scope.toLang = lookup[dir[1]]
         $scope.otherLang = lookup[other]
+        $scope.toMinified = "fullSize"
         
         var lookup2 = {
             'C': "转换成字符：",
@@ -137,7 +140,12 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
         lookup3[4] = "1 wk"
         lookup3[5] = "2 wk"
         lookup3[6] = "1 mon"
+        lookup3[7] = "2 mon"
+        lookup3[8] = "4 mon"
+        lookup3[9] = "8 mon"
+        lookup3[10] = "1 yr"
         $scope.boxstatus = lookup3[first.fields.score]
+        if ($scope.boxstatus === undefined) $scope.boxstatus = "3 mon"
 
 
         var triples = []
@@ -156,6 +164,10 @@ Flashcards.controller('flashcards', ['$scope','$timeout','$http',function($scope
             $scope.otherTexts = []
             for (var i = 0; i < $scope.current.length; i++) {
                 var row = JSON.parse(response.data[i])
+                var toLength = row[0].fields[lookup[dir[1]]].replace("...","").length
+                if (dir[1] == "C" && toLength >= 4 && $scope.current.length > 1)  {
+                    $scope.toMinified = "minified"
+                } 
                 $scope.toTexts.push(row[0].fields[lookup[dir[1]]])
                 $scope.otherTexts.push(row[0].fields[lookup[other]])
                 $scope.chapter.push(row[0].fields.chapter)

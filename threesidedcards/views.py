@@ -102,6 +102,8 @@ def home(request):
 
 
 def getItems(request):
+
+
     items = Score.objects.filter(user=request.user,nexttime__lte=datetime.datetime.now())
 
     #if no items are found return the time when more will be available
@@ -110,15 +112,8 @@ def getItems(request):
         return HttpResponse(json.dumps(items[0].nexttime,cls=DjangoJSONEncoder))
 
 
-    for i in json.loads(request.GET['prev']):
-        items = items.exclude(triple__pk=i)
-
-    if len(items) == 0:
-        items = Score.objects.filter(user=request.user,nexttime__lte=datetime.datetime.now())
-
     message = ""
 
-    length = len(items)
 
     chapter = -1
     isquiz = False
@@ -127,18 +122,56 @@ def getItems(request):
         isquiz = request.GET["filter"].split()[2] == 'Quiz'
         newitems = items.filter(triple__chapter=chapter)
 
-        if (len(newitems) == 0):
-            message = "没有第"+str(chapter)+"课的卡片。"
-            chapter = -1
-        else:
+        mode = False
+        original = chapter
+        while (len(newitems) == 0):
+            if not mode:
+                chapter -= 1
+            else:
+                chapter += 1
+            newitems = items.filter(triple__chapter=chapter)
+
+
+            if (chapter <= 1):
+                mode = True
+
+            if (chapter > 50):
+                message = "没有第"+str(chapter)+"课的卡片。"
+                break
+
+        if (len(newitems) > 0):
             items = newitems
-            if isquiz:
-                newitems = items.filter(triple__quiz=True)
-                if (len(newitems) == 0):
-                    message = "没有第"+str(chapter)+"课的考试卡片。"
-                    isquiz =False
-                else:
-                    items = newitems
+
+        #if (len(newitems) == 0):
+        #    message = "没有第"+str(chapter)+"课的卡片。"
+        #    chapter = -1
+        #else:
+        #    items = newitems
+        #    if isquiz:
+        #        newitems = items.filter(triple__quiz=True)
+        #        newitems = newitems.exclude(direction='CP')
+        #        newitems = newitems.exclude(direction='CE')
+        #        newitems = newitems.exclude(direction='EP')
+        #        newitems = newitems.exclude(direction='EC')
+        #        if (len(newitems) == 0):
+        #            message = "没有第"+str(chapter)+"课的考试卡片。"
+        #            isquiz =False
+        #        else:
+        #            items = newitems
+
+
+
+    newitems = items
+    for i in json.loads(request.GET['prev']):
+        newitems = newitems.exclude(triple__pk=i)
+
+    if len(newitems) != 0:
+        items = newitems
+
+    # items = Score.objects.filter(triple__english='meeting').filter(direction='PC')
+
+
+    length = len(items)
 
 
     chapters = []
@@ -148,14 +181,24 @@ def getItems(request):
     selectedchapter = chapters[0]
     while (len(triples) != 0):
         count = len(userscores.filter(triple__chapter=triples[0].chapter))
-        chapters.append("Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡")
+        charonly = 0 == len(userscores.filter(triple__chapter=triples[0].chapter).exclude(direction='EC').exclude(direction="PC"))
+        chartext = ", C only" if charonly else ""
 
-        if chapter == triples[0].chapter: selectedchapter = "Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡"
+        if (count > 0):
+            chapters.append("Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡" + chartext)
 
-        countquiz = len(userscores.filter(triple__chapter=triples[0].chapter,triple__quiz=True))
-        if (countquiz != 0):
+        if chapter == triples[0].chapter: selectedchapter = "Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡" + chartext
+
+        quizwords = userscores.filter(triple__chapter=triples[0].chapter,triple__quiz=True)
+        quizwords = quizwords.exclude(direction='CP')
+        quizwords = quizwords.exclude(direction='CE')
+        quizwords = quizwords.exclude(direction='EP')
+        quizwords = quizwords.exclude(direction='EC')
+        countquiz = len(quizwords)
+
+        if (countquiz != 0 and False): #disable quiz selector
             chapters.append("Chapter "+str(triples[0].chapter) + " Quiz " + str(countquiz) + "个卡")
-            if chapter == triples[0].chapter and isquiz: selectedchapter = "Chapter "+str(triples[0].chapter) + " All " + str(count) + "个卡"
+            if chapter == triples[0].chapter and isquiz: selectedchapter = "Chapter "+str(triples[0].chapter) + " Quiz " + str(countquiz) + "个卡"
 
         triples = triples.exclude(chapter=triples[0].chapter)
 
@@ -169,6 +212,10 @@ def getItems(request):
     #        message = "优先: Chapter " + str(chapter) + ", "+str(len(newitems))+"个卡。"
 
     choice = random.choice(items)
+
+    if request.user.is_staff and "debug" in request.GET:
+        choice = Score.objects.get(pk=int(request.GET["debug"]))
+
 
     if choice.direction[0] == "C":
         fromText = choice.triple.characters
@@ -217,8 +264,18 @@ def newTime(score):
         return now + datetime.timedelta(weeks=1)
     if score == 5:
         return now + datetime.timedelta(weeks=2)
-    if score >= 6:
-        return now + datetime.timedelta(months=1)
+    if score == 6:
+        return now + datetime.timedelta(weeks=4)
+    if score == 7:
+        return now + datetime.timedelta(weeks=8)
+    if score == 8:
+        return now + datetime.timedelta(weeks=16)
+    if score == 9:
+        return now + datetime.timedelta(weeks=32)
+    if score >= 10:
+        return now + datetime.timedelta(weeks=52)
+
+
 
 
 
@@ -246,7 +303,8 @@ def statusData(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse("threesidedcards.views.login"))
 
-    if (request.user.is_staff or request.user.is_superuser or request.user.username == "wxyun"):
+    if (request.user.username == "wxyun"):
+    #if (request.user.is_staff or request.user.is_superuser or request.user.username == "wxyun"):
         datalist = []
         for user in User.objects.all():
             dataobject = {'name': user.username}
@@ -256,7 +314,7 @@ def statusData(request):
             for score in Score.objects.filter(user=user):
                 scoretotal += score.score
                 count += 1
-                dataobject["histogram"].append({'score': score.score, 'direction':score.direction})
+                dataobject["histogram"].append({'score': score.score, 'direction':score.direction, 'chapter':score.triple.chapter})
             if count == 0: dataobject["score"] = 0
             else: dataobject["score"] = round(scoretotal/count,2)
             datalist.append(dataobject)
@@ -266,7 +324,7 @@ def statusData(request):
         dataobject = {'name': request.user.username}
         dataobject["histogram"] = []
         for score in Score.objects.filter(user=request.user):
-            dataobject["histogram"].append({'score': score.score, 'direction':score.direction})
+            dataobject["histogram"].append({'score': score.score, 'direction':score.direction, 'chapter':score.triple.chapter})
         datalist.append(dataobject)
 
 

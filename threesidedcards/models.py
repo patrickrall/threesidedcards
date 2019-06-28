@@ -19,7 +19,7 @@ class Triple(models.Model):
         super(Triple,self).save(*args,**kwargs)
         for user in User.objects.all():
             for direct in ['CP','PC','CE','EC','EP','PE']:
-                score = Score.objects.filter(triple=self,direction=direct)
+                score = Score.objects.filter(user=user,triple=self,direction=direct)
                 if len(score) == 0:
                     score = Score()
                     score.triple = self

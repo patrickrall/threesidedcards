@@ -1,2 +1,2 @@
-defaultpass = "mypassword"
+defaultpass = "wanglaoshi"
 defaultemail = "me@example.com"

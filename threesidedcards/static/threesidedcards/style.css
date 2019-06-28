@@ -166,6 +166,7 @@ table.flipcard td:only-of-type {
     font-weight:normal !important;
 }
 
+
 table.flipcard div.chaptermarker {
     position:absolute;
     font-size:15px;
@@ -201,9 +202,20 @@ table.flipcard div.chaptermarker {
     font-size:70px;
 }
 
+
+
+tr.characters:first-of-type td.not:only-of-type) {
+    font-size:30px !important;
+}
+
 tr.characters:first-of-type td {
     font-size:70px;
 }
+
+tr.characters.minified:first-of-type td {
+    font-size:30px !important;
+}
+
 
 
 input:not([type="checkbox"]) {

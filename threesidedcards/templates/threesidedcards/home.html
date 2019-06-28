@@ -6,6 +6,7 @@
          
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="theme-color" content="#A4A4FF">
 
         <title>汉字、英文、拼音三面卡！</title>
         
@@ -23,7 +24,7 @@
                 <div class="quizmarker" ng-show="onquiz">On Quiz</div><div class="alternatives" ng-hide="current.length == 1">{{ current.length }} meanings</div><div class="chaptermarker" >Chapter {{ chapter[0] }}</div><div class="boxstatus" >{{ boxstatus }}</div>
                 {{fromText|unsafe}}</div>
             <table class="flipcard secondcard" ng-class="[flipped]" ng-show="length > 0" ng-click="cardflip()">
-                <tr class="toRow" ng-class="[toLang]"><td ng-repeat="toText in toTexts track by $index"><div class="chaptermarker" >Chapter {{ chapter[$index] }}</div>{{ toText| unsafe }}</td></tr>
+                <tr class="toRow" ng-class="[toLang,toMinified]"><td ng-repeat="toText in toTexts track by $index"><div class="chaptermarker" >Chapter {{ chapter[$index] }}</div>{{ toText| unsafe }}</td></tr>
                 <tr class="otherRow" ng-class="[otherLang]"><td ng-repeat="otherText in otherTexts track by $index" ng-bind-html="otherText|unsafe"></td></tr>
             </table>
             <div style="cursor:pointer;" ng-show="!isready && length > 0" ng-click="ready()">好了</div>

@@ -2,11 +2,9 @@
 <html>
     <head>
         {% load staticfiles %}
-
         <link rel="stylesheet" type="text/css" href="{% static 'threesidedcards/style.css' %}" />
-         
-
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="theme-color" content="#A4A4FF">
         <title>汉字、英文、拼音三面卡！</title>
         <script type="text/javascript" src="{% static 'threesidedcards/angular.js' %}"></script> 
         <script type="text/javascript" src="{% static 'threesidedcards/status.js' %}"></script>
@@ -18,7 +16,8 @@
             <div style="text-align:center;">Logged in as{% endverbatim %} {{ request.user }}{% verbatim %}.  <span style="white-space:nowrap;"><a href="/flashcards">Main</a> <a href="/flashcards/logout/">Log out</a></span></div>
             <div ng-show="error != ''">{{ error }}</div>
             <div><h2>User Status</h2></div>
-            <div ng-repeat-start="user in users">{{ user.name }} <span ng-show="user.score !== undefined"> - Score: {{ user.score }}</span></div>
+            <div ng-show="users.length == 0">Loading...</div>
+            <div ng-repeat-start="user in users" ng-hide="users.length == 1">{{ user.name }} <span ng-show="user.score !== undefined"> - Score: {{ user.score }}</span></div>
             <div ng-repeat-end histogram="user.histogram"></div>
         </div>
     </body>

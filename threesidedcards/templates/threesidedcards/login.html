@@ -4,6 +4,7 @@
         {% load staticfiles %}
         <link rel="stylesheet" type="text/css" href="{% static 'threesidedcards/style.css' %}" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="theme-color" content="#A4A4FF">
         <title>汉字、英文、拼音三面卡！</title>
     </head>
     <body>
@@ -33,13 +34,13 @@
             <div>{{ error }}</div>
             {% endif %}
             <div>New users: log in to create a user</div>
-            <input type="text" placeholder="Type your username..." value="" name="user" />
+            <input class="english" type="text" placeholder="Type your username..." value="" name="user" />
             {%if notlocal %}
             <div>Please type the off-campus password:</div>
-            <input type="password" value="" name="password" />
+            <input  class="english" type="password" value="" name="password" />
             {% endif %}
 
-            <input type="submit" value="Log in" />
+            <input class="characters" type="submit" value="Log in" />
             </form>
             {% endif %}
         </div>
